@@ -49,11 +49,12 @@ class Catalogo:
             
         self.__filmes.append(filme)
         
-    def remover_filme(self, titulo: str):
+    def remover_filme(self, titulo: str) -> bool:
         for filme in self.__filmes:
             if filme.titulo == titulo.upper():
                 self.__filmes.remove(filme)
-                return
+                return True
+        return False
 
 
     def listar_filmes(self, genero: str=""):
@@ -66,6 +67,11 @@ class Catalogo:
         existe_filme_do_genero: bool = False
         
         for filme in self.__filmes:
+            if not genero:
+                saida = "Todos os filmes do catalogo: \n\n"
+                saida += f"{filme}\n"
+                print(saida)
+                return
             if genero.upper() in Filme.generos:
                 saida = f"Filmes do gênero: {genero}: \n\n"
                 if filme.genero.upper() == genero.upper():
@@ -75,10 +81,8 @@ class Catalogo:
                     print(saida)
                 return
             else:
-                saida = "Todos os filmes do catalogo: \n\n"
-                saida += f"{filme}\n"
-                print(saida)
-                return
+                raise ValueError("Erro! Esse Gênero não existe no catalogo!")
+                
         if not existe_filme_do_genero:
             print("Não há filmes do gênero escolhido cadastrados!")
             return

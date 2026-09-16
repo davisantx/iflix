@@ -14,17 +14,19 @@ def teste():
         catalogo_1.listar_filmes()
         
         catalogo_1.remover_filme("Um Sonho de Liberdade")
-    
+
         catalogo_1.listar_filmes("drama")
+        
         
     except (ValueError, TypeError) as e:
         print(e)
 
     
 def menu(opcoes: list[str]):
+    saida = ""
     for i, opcao in enumerate(opcoes):
-        print(f"{i + 1} - {opcao}")
-    print("\n")
+        saida += (f"{i + 1} - {opcao}\n")
+    print(f"{saida}\n")
 
 def entrada(msg: str, e_texto: bool=False) -> int | str:
     while True:
@@ -55,72 +57,114 @@ def formulario(cabecalho: str, campos: list[tuple[str, type]]):
         
     return saida
         
-
-def sistema():
-    catologo = Catalogo()
-    while True:
-        print("Bem vindo ao sistema de catalógos de filmes: \n")
-        menu(opcoes=["Adicionar", "Remover", "Listar", "Sair"])
-
-        opcao_selecionada = entrada("Escolha uma das opções: ")
-
-        if opcao_selecionada == 1:
-            informacoes = formulario(
-                cabecalho="Adicionar filme: ",
-                campos=[
-                    ("Título", str),
-                    ("Diretor", str),
-                    ("Ano", int),
-                    ("Gênero", str),
-                ]
+def adicionar(catalogo: Catalogo) -> None:
+    informacoes = {}
+    
+    try:
+        informacoes = formulario(
+            cabecalho="Adicionar filme: ",
+            campos=[
+                ("Título", str),
+                ("Diretor", str),
+                ("Ano", int),
+                ("Gênero", str),
+            ]
+        )
+    except TypeError as e:
+        print(e)
+        
+    try:
+        catalogo.adicionar_filme(
+            filme=Filme(
+                titulo=informacoes["Título"], 
+                diretor=informacoes["Diretor"], 
+                ano=informacoes["Ano"], 
+                genero=informacoes["Gênero"]
             )
+        )
+    except ValueError as e:
+        print(e)
 
-            catologo.adicionar_filme(
-                filme=Filme(
-                    titulo=informacoes["Título"], 
-                    diretor=informacoes["Diretor"], 
-                    ano=informacoes["Ano"], 
-                    genero=informacoes["Gênero"]
-                )
-            )
-            continue
+def remover(catalogo: Catalogo) -> None:
+    informacoes = {}
+    try:
+        informacoes = formulario(
+            cabecalho="Remover filme: ",
+            campos=[
+                ("Título", str),
+            ]
+        )
+    except TypeError as e:
+        print(e)
 
-        if opcao_selecionada == 2:
-            informacoes = formulario(
-                cabecalho="Remover filme: ",
-                campos=[
-                    ("Título", str),
-                ]
-            )
-            catologo.remover_filme(informacoes["Título"])
-            continue
-            
-        if opcao_selecionada == 3:
-            menu(
-                opcoes=[
-                    "Todos",
-                    "Por gênero"
-                ]
-            )
-            
-            genero = entrada("Insira a opção: ")
-            
-            if genero == 1:
-                catologo.listar_filmes()
-                continue
-                
-            if genero == 2:
+    if catalogo.remover_filme(informacoes["Título"]):
+        print(f"Livro {informacoes["Título"]} removido com sucesso!")
+        return
+        
+    print(f"Livro {informacoes["Título"]} não foi encontrado!")
+
+def listar(catalogo: Catalogo):
+    menu(
+        opcoes=[
+            "Todos",
+            "Por gênero"
+        ]
+    )
+    
+    genero = entrada("Insira a opção: ")
+
+    match genero:
+        case 1:
+            catalogo.listar_filmes()
+  
+        case 2:
+            dados = {}
+            try:
                 dados = formulario(
                     cabecalho="",
                     campos=[("Insira o gênero: ", str)]
                 )
-                catologo.listar_filmes(dados["Insira o gênero: "])
-                continue
+            except TypeError as e:
+                print(e)
                 
-        if opcao_selecionada == 4:
-            print("Saindo...")
-            break
+            try:
+                catalogo.listar_filmes(dados["Insira o gênero: "])
+            except ValueError as e:
+                print(e)
+        case _:
+            print("Opção inválida!")
+            
+def sistema():
+    catalogo = Catalogo()
+    while True:
+        print("Bem vindo ao sistema de catalógos de filmes: \n")
+        menu(
+            opcoes=[
+                "Adicionar", 
+                "Remover", 
+                "Listar", 
+                "Sair"
+            ]
+        )
+
+        opcao_selecionada = entrada("Escolha uma das opções: ")
+
+        match opcao_selecionada:
+            case 1:
+                adicionar(catalogo=catalogo)
+                continue
+            case 2:
+                remover(catalogo=catalogo)
+                continue
+            case 3:
+                listar(catalogo=catalogo)
+                continue
+            case 4:
+                print("Saindo...")
+                break
+            case _:
+                print("Opção inválida!\n")
+                continue
             
 if __name__ == "__main__":
     sistema()
-            
